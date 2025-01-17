@@ -81,12 +81,7 @@ def extract_content(url):
     # تنظیم جهت متن بر روی راست به چپ (در صورت وجود body)
     if soup.body:
         soup.body['dir'] = 'rtl'
-
-    # ـــــــــــــــــــــــــــــــــــــــــــــــــــــــ
-    # تزریق @font-face برای استفاده از فایل فونت Vazir-Medium.ttf
-    # ـــــــــــــــــــــــــــــــــــــــــــــــــــــــ
-
-    # 1) اطمینان از وجود تگ <head>
+        
     head_tag = soup.find("head")
     if not head_tag:
         head_tag = soup.new_tag("head")
