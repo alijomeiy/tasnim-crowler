@@ -2,12 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 
 def keepable_tag(tag):
-    """
-    بررسی می‌کند آیا تگ به‌تنهایی شرایط نگه‌داری دارد یا خیر:
-      1) تگ script با type="text/css"
-      2) تگی که کلاس آن شامل 'col' و 'col-12' باشد
-    """
-    # اگر تگ script است و نوع آن text/css باشد
+    if tag.name == "head":
+        return True
+    
     if tag.name == "script" and tag.get("type") == "text/css":
         return True
 
@@ -19,11 +16,6 @@ def keepable_tag(tag):
     return False
 
 def is_subtree_keepable(tag):
-    """
-    بررسی می‌کند آیا این تگ یا هر یک از فرزندانش (به صورت بازگشتی)
-    نگه‌داشتنی هستند یا خیر.
-    اگر تگ یا یکی از فرزندانش نگه‌داشتنی باشد، نتیجه True است.
-    """
     if keepable_tag(tag):
         return True
 
@@ -33,39 +25,17 @@ def is_subtree_keepable(tag):
     return False
 
 def remove_unkeepable(tag):
-    """
-    به شکل بازگشتی (Post-order) روی درخت HTML حرکت می‌کند و تگ‌هایی را حذف می‌کند که:
-      - خودش نگه‌داشتنی نیست
-      - و هیچ فرزند نگه‌داشتنی هم ندارد.
-
-    اما اگر:
-      - تگ، خود تگ <head> باشد، کاری با آن (و فرزندانش) نداریم.
-      - تگ نگه‌داشتنی باشد، کل زیرشاخه‌اش را حفظ می‌کنیم.
-    """
-    # اگر تگ head باشد، هیچ حذفی انجام نمی‌دهیم تا همهٔ فرزندان head حفظ شوند
-    if tag.name == "head":
-        return
-
-    # اگر خود تگ نگه‌داشتنی باشد، کل زیرشاخه را نگه می‌داریم
     if keepable_tag(tag):
         return
 
-    # در غیر این صورت، باید فرزندان را بررسی و حذف کنیم
     for child in list(tag.children):
         if child.name:
             remove_unkeepable(child)
 
-    # اگر پس از حذف فرزندان غیرضروری، این تگ و باقیمانده‌اش نگه‌داشتنی نباشند، حذف می‌کنیم
     if not is_subtree_keepable(tag):
         tag.decompose()
 
 def extract_content(url):
-    """
-    محتوای صفحه را می‌گیرد، تگ‌ها را بر اساس منطق بالا فیلتر می‌کند
-    (با حفظ <head> و ساختار والدین در صورت وجود فرزندان نگه‌داشتنی)
-    سپس تگ‌هایی که کلاس 'footer-container container' دارند را حذف می‌کند،
-    در نهایت کل صفحه را راست‌چین (rtl) کرده و خروجی را برمی‌گرداند.
-    """
     response = requests.get(url)
     if response.status_code != 200:
         print(f"خطا در دریافت صفحه: {url}")
@@ -73,7 +43,6 @@ def extract_content(url):
 
     soup = BeautifulSoup(response.content, 'html.parser')
     
-    # مرحله 1) حذف تگ‌های ناخواسته (به جز <head>)
     remove_unkeepable(soup)
     
     # مرحله 2) حذف تگ‌هایی که کلاس 'footer-container' و 'container' را با هم دارند
@@ -85,21 +54,13 @@ def extract_content(url):
     for f in footers:
         f.decompose()
     
-    # مرحله 3) راست‌چین کردن کل صفحه
-    if soup.html:
-        soup.html['dir'] = 'rtl'
-    else:
-        if soup.body:
-            soup.body['dir'] = 'rtl'
+    
+    soup.body['dir'] = 'rtl'
 
-    # مرحله 4) خروجی نهایی را از تگ بدنه به صورت prettify برمی‌گردانیم
     body = soup.find('body')
-    return body.prettify() if body else soup.prettify()
+    return body.prettify() #if body else soup.prettify()
 
 def convert_to_html(content, output_path):
-    """
-    محتوای استخراج‌شده را در یک فایل HTML ذخیره می‌کند.
-    """
     if content:
         with open(output_path, 'w', encoding='utf-8') as file:
             file.write(content)
@@ -127,7 +88,6 @@ def extract_links():
     for li in li_elements:
         span = li.find('span')
         anchor = li.find('a')
-        # بررسی اینکه آیا span متن "تفسیر سوره بقره جلسه" را دارد
         if span and 'تفسیر سوره بقره جلسه' in span.text:
             if anchor and anchor.has_attr('href'):
                 links.append(anchor['href'])
