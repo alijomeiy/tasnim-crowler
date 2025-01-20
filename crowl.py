@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
+
 def keepable_tag(tag):
     """
     تشخیص اینکه آیا تگ باید نگه داشته شود یا خیر.
@@ -8,7 +9,7 @@ def keepable_tag(tag):
     # نگه‌داشتن تگ head
     if tag.name == "head":
         return True
-    
+
     # نگه‌داشتن تگ‌های script با نوع text/css
     if tag.name == "script" and tag.get("type") == "text/css":
         return True
@@ -64,24 +65,24 @@ def extract_content(url):
         print(f"خطا در دریافت صفحه: {url}")
         return None
 
-    soup = BeautifulSoup(response.content, 'html.parser')
-    
+    soup = BeautifulSoup(response.content, "html.parser")
+
     # حذف تگ‌های ناخواسته
     remove_unkeepable(soup)
-    
+
     # حذف تگ‌هایی که کلاس 'footer-container' و 'container' را با هم دارند
     footers = soup.find_all(
-        lambda t: t.get('class')
-                  and 'footer-container' in t.get('class')
-                  and 'container' in t.get('class')
+        lambda t: t.get("class")
+        and "footer-container" in t.get("class")
+        and "container" in t.get("class")
     )
     for f in footers:
         f.decompose()
-    
+
     # تنظیم جهت متن بر روی راست به چپ (در صورت وجود body)
     if soup.body:
-        soup.body['dir'] = 'rtl'
-        
+        soup.body["dir"] = "rtl"
+
     head_tag = soup.find("head")
     if not head_tag:
         head_tag = soup.new_tag("head")
@@ -124,7 +125,7 @@ def convert_to_html(content, output_path):
     محتوای HTML را در فایل مشخص‌شده ذخیره می‌کند.
     """
     if content:
-        with open(output_path, 'w', encoding='utf-8') as file:
+        with open(output_path, "w", encoding="utf-8") as file:
             file.write(content)
         print(f"فایل HTML ذخیره شد: {output_path}")
     else:
@@ -133,32 +134,48 @@ def convert_to_html(content, output_path):
 
 # ----------------------------- نمونه‌ی استفاده -----------------------------
 if __name__ == "__main__":
-    print("==========START!===========")
 
     # لینک صفحه وب که حاوی لیست جلسات تفسیر است
-    page_url = 'https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1/-/categories/2087759?p_r_p_resetCur=true&p_r_p_categoryId=2087759'
-    response = requests.get(page_url)
-    if response.status_code != 200:
-        print(f"خطا در دریافت صفحه: {page_url}")
-        exit()
+    pages_url = [
+        "https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1/-/categories/2087759?p_r_p_resetCur=true&p_r_p_categoryId=2087759",
+        "https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_r_p_categoryId=2087759&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_delta=55&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_cur=2",
+        "https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_r_p_categoryId=2087759&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_delta=55&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_cur=3",
+        "https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_r_p_categoryId=2087759&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_delta=55&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_cur=4",
+        "https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_r_p_categoryId=2087759&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_delta=55&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_cur=5",
+        "https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_r_p_categoryId=2087759&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_delta=55&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_cur=6",
+        "https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_r_p_categoryId=2087759&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_delta=55&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_cur=7",
+        "https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_r_p_categoryId=2087759&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_delta=55&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_cur=8",
+        "https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_r_p_categoryId=2087759&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_delta=55&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_cur=9",
+        "https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_r_p_categoryId=2087759&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_delta=55&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_cur=10",
+        "https://javadi.esra.ir/%D8%A2%D8%B1%D8%B4%DB%8C%D9%88-%D8%AF%D8%B1%D9%88%D8%B3-%D8%AA%D9%81%D8%B3%DB%8C%D8%B1?p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_r_p_categoryId=2087759&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_delta=55&p_r_p_resetCur=false&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_NUgOaY7xwfqN_cur=11",
+    ]
+    links = []
+    all_links = []
+    li_elements = []
+    for page_url in pages_url:
+        index = pages_url.index(page_url)
+        print(f"==========START: {index}===========")
+        response = requests.get(page_url)
+        if response.status_code != 200:
+            print(f"خطا در دریافت صفحه: {page_url}")
+            exit()
 
-    soup = BeautifulSoup(response.content, 'html.parser')
-    li_elements = soup.find_all('li')
+        soup = BeautifulSoup(response.content, "html.parser")
+        li_elements.extend(soup.find_all("li"))
 
     def extract_links():
-        links = []
         for li in li_elements:
-            span = li.find('span')
-            anchor = li.find('a')
-            if span and 'تفسیر سوره بقره جلسه' in span.text:
-                if anchor and anchor.has_attr('href'):
-                    links.append(anchor['href'])
+            span = li.find("span")
+            anchor = li.find("a")
+            if span and "تفسیر سوره بقره جلسه" in span.text:
+                if anchor and anchor.has_attr("href"):
+                    links.append(anchor["href"])
         return links
 
-    all_links = extract_links()
+    all_links.extend(extract_links()) 
     for i, url in enumerate(all_links):
         content = extract_content(url)
         output_file = f"tafseer_baqara_session_{i + 1}.html"
         convert_to_html(content, output_file)
 
-    print("==========DONE!===========")
+        print("==========DONE!===========")
